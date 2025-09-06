@@ -1,0 +1,56 @@
+{
+  "products": [
+    { "id": 1, "sku": "P-001", "title": "Ноутбук", "price": 120000, "stock": 5, "updatedAt": "2025-08-10T12:00:00Z" },
+    { "id": 2, "sku": "P-002", "title": "Мышь", "price": 5000, "stock": 20, "updatedAt": "2025-08-12T09:00:00Z" },
+    { "id": 3, "sku": "P-003", "title": "Клавиатура", "price": 8000, "stock": 15, "updatedAt": "2025-08-14T15:00:00Z" },
+    { "id": 4, "sku": "P-004", "title": "Монитор", "price": 45000, "stock": 7, "updatedAt": "2025-08-18T10:30:00Z" },
+    { "id": 5, "sku": "P-005", "title": "Принтер", "price": 60000, "stock": 3, "updatedAt": "2025-08-20T11:45:00Z" }
+  ],
+  "orders": [
+    {
+      "id": 1,
+      "number": "ORD-001",
+      "customerName": "Иван Иванов",
+      "status": "new",
+      "items": [
+        { "productId": 1, "qty": 1, "price": 120000 }
+      ],
+      "total": 120000,
+      "createdAt": "2025-08-15T08:00:00Z"
+    },
+    {
+      "id": 2,
+      "number": "ORD-002",
+      "customerName": "Пётр Петров",
+      "status": "processing",
+      "items": [
+        { "productId": 2, "qty": 2, "price": 5000 }
+      ],
+      "total": 10000,
+      "createdAt": "2025-08-16T09:30:00Z"
+    },
+    {
+      "id": 3,
+      "number": "ORD-003",
+      "customerName": "Сергей Сергеев",
+      "status": "completed",
+      "items": [
+        { "productId": 3, "qty": 1, "price": 8000 },
+        { "productId": 4, "qty": 1, "price": 45000 }
+      ],
+      "total": 53000,
+      "createdAt": "2025-08-17T14:20:00Z"
+    },
+    {
+      "id": 4,
+      "number": "ORD-004",
+      "customerName": "Анна Смирнова",
+      "status": "new",
+      "items": [
+        { "productId": 5, "qty": 1, "price": 60000 }
+      ],
+      "total": 60000,
+      "createdAt": "2025-08-19T12:10:00Z"
+    }
+  ]
+}
