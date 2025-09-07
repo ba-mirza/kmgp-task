@@ -1,4 +1,5 @@
 import {Injectable, signal} from '@angular/core';
+import {delay} from '../../shared/utils/delay';
 
 interface UserDTO {
   email: string;
@@ -15,6 +16,8 @@ export class AuthService {
   )
 
   async login(credentials: UserDTO): Promise<boolean> {
+    await delay(1000);
+
     if (credentials.email.includes('@') && credentials.password.length >= 3) {
       const token = `token_${credentials.email}_${Date.now()}`;
       this.setToken(token);
