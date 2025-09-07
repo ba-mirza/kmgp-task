@@ -35,14 +35,11 @@ type Variants = 'default' | 'error';
 
       @if (control().invalid && control().touched && control().errors) {
         <div class="text-xs text-red-500 mt-1">
-          @if (control().errors?.['required']) {
-            <p-message severity="error">Это поле обязательно</p-message>
-          }
           @if (control().errors?.['email']) {
-            <span>Введите корректный email</span>
+            <p-message severity="error">Введите корректный email</p-message>
           }
           @if (control().errors?.['minlength']) {
-            <span>Минимум {{ control().errors?.['minlength'].requiredLength }} символов</span>
+            <p-message severity="error">Минимум {{ control().errors?.['minlength'].requiredLength }} символов</p-message>
           }
         </div>
       }

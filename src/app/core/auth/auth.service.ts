@@ -14,13 +14,17 @@ export class AuthService {
     sessionStorage.getItem(this.STORAGE_KEY)
   )
 
-  public login(credentials: UserDTO) {
-    const token = `token_${credentials.email}`;
-    this.setToken(token);
-    return true;
+  async login(credentials: UserDTO): Promise<boolean> {
+    if (credentials.email.includes('@') && credentials.password.length >= 3) {
+      const token = `token_${credentials.email}_${Date.now()}`;
+      this.setToken(token);
+      return true;
+    }
+
+    return false;
   }
 
-  public logout() {
+  logout() {
     this.setToken(null);
     sessionStorage.removeItem(this.STORAGE_KEY);
   }
