@@ -11,7 +11,7 @@ interface User {
 export class AuthService {
   private readonly STORAGE_KEY: string = 'auth_token';
   protected authToken = signal<string | null>(
-    localStorage.getItem(this.STORAGE_KEY)
+    sessionStorage.getItem(this.STORAGE_KEY)
   )
 
   public login(dto: User) {
@@ -22,7 +22,7 @@ export class AuthService {
 
   public logout() {
     this.setToken(null);
-    localStorage.removeItem(this.STORAGE_KEY);
+    sessionStorage.removeItem(this.STORAGE_KEY);
   }
 
   get token() {
@@ -35,10 +35,10 @@ export class AuthService {
 
   protected setToken(token: string | null) {
     if (!token) {
-      localStorage.removeItem(this.STORAGE_KEY);
+      sessionStorage.removeItem(this.STORAGE_KEY);
       return;
     }
     this.authToken.set(token);
-    localStorage.setItem(this.STORAGE_KEY, token as string);
+    sessionStorage.setItem(this.STORAGE_KEY, token as string);
   }
 }
