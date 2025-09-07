@@ -1,6 +1,6 @@
 import {Injectable, signal} from '@angular/core';
 
-interface User {
+interface UserDTO {
   email: string;
   password: string;
 }
@@ -14,8 +14,8 @@ export class AuthService {
     sessionStorage.getItem(this.STORAGE_KEY)
   )
 
-  public login(dto: User) {
-    const token = `token_${dto.email}`;
+  public login(credentials: UserDTO) {
+    const token = `token_${credentials.email}`;
     this.setToken(token);
     return true;
   }

@@ -4,6 +4,7 @@ import {AuthService} from '../../core/auth/auth.service';
 import {FormControl, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ButtonComponent} from '../../components/ui/button.component';
 import { MessageModule } from 'primeng/message';
+import {ToastService} from '../../shared/toast.service';
 
 @Component({
   selector: 'app-login',
@@ -11,13 +12,15 @@ import { MessageModule } from 'primeng/message';
     InputComponent,
     ReactiveFormsModule,
     MessageModule,
-    ButtonComponent
+    ButtonComponent,
   ],
+  providers: [ToastService],
   templateUrl: './login.html',
   styleUrl: './login.scss'
 })
 export class Login {
   protected authService = inject(AuthService);
+  protected toastService = inject(ToastService);
 
   protected emailField = new FormControl('', [Validators.required, Validators.email, Validators.min(5)]);
   protected passwordField = new FormControl('', [Validators.required]);
@@ -28,8 +31,13 @@ export class Login {
 
     if(email && password) {
       const dto = { email, password}
-      this.authService.login(dto)
+      const logged = this.authService.login(dto)
+      if(logged) {
+        this.toastService.success("Logged in successfully!");
+      }
       return;
     }
+
+    return this.toastService.error("Invalid email or password");
   }
 }
