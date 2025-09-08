@@ -1,11 +1,65 @@
-import { Component } from '@angular/core';
+import {Component, computed, inject, OnInit, signal} from '@angular/core';
+import {OrdersApiService} from '../../core/api/orders-api.service';
+import { TagModule } from 'primeng/tag';
+import {TableModule} from 'primeng/table';
+import {Order} from '../../core/types';
+import {debounceTime, distinctUntilChanged, map, Observable, of, startWith, switchMap} from 'rxjs';
+import {AsyncPipe} from '@angular/common';
+import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
+import {InputComponent} from '../../components/ui/input.component';
 
 @Component({
   selector: 'app-orders',
-  imports: [],
+  imports: [
+    TagModule,
+    TableModule,
+    AsyncPipe,
+    InputComponent,
+    ReactiveFormsModule,
+  ],
   templateUrl: './orders.html',
   styleUrl: './orders.scss'
 })
-export class Orders {
+export class Orders implements OnInit {
+  protected orderService = inject(OrdersApiService);
+  protected orderList = signal<Observable<Order[]>>(of([]));
 
+  protected formattedDate = (date: string) => new Date(date).toDateString();
+
+  protected searchForms = new FormGroup({
+    customerName: new FormControl(''),
+    status: new FormControl(''),
+  })
+
+  protected paginatorState = computed(() => (this.filteredOrders.length > 10));
+  protected scrollableState = computed(() => (this.filteredOrders.length > 20))
+
+  protected filteredOrders = computed((): Observable<Order[]> => {
+    const control = this.searchForms.controls.customerName as FormControl;
+
+    const nameChanges$ = control.valueChanges
+      ? (control.valueChanges as Observable<string>).pipe(
+        startWith(control.value ?? ''),
+        debounceTime(200),
+        distinctUntilChanged()
+      )
+      : of(control.value ?? '');
+
+    return nameChanges$.pipe(
+      switchMap((search) =>
+        this.orderList().pipe(
+          map(orders => {
+            const q = (search ?? '').toString().toLowerCase().trim();
+            if (!q) return orders;
+            return orders.filter(o => (o.customerName ?? '').toLowerCase().includes(q));
+          })
+        )
+      )
+    );
+  });
+
+  ngOnInit(): void {
+    const orders = this.orderService.getOrders();
+    this.orderList.set(orders)
+  }
 }
