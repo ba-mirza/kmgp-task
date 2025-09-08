@@ -3,8 +3,15 @@
 
   <div class="w-full max-w-6xl">
     <div class="flex items-center gap-4 mb-2">
-      <ui-input label="Поиск по клиенту" [control]="searchForms.controls.customerName" />
-      <ui-input label="Фильтр по статусу" [control]="searchForms.controls.status" />
+      <ui-input label="Поиск по клиенту" [control]="customerName" />
+      <div class="flex flex-col gap-3 relative">
+        <ui-input (focusin)="autoComplete(true)" (focusout)="autoComplete(false)" label="Фильтр по статусу" />
+        @if (show()) {
+          <div class="absolute top-18 left-0 z-50">
+            <p-listbox [(ngModel)]="selectedStatus" [options]="statuses()" optionLabel="status" class="w-full md:w-56" />
+          </div>
+        }
+      </div>
     </div>
     <p-table
       [value]="(filteredOrders() | async)!"
