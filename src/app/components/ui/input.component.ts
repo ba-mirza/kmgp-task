@@ -47,7 +47,7 @@ type Variants = 'default' | 'error';
   `
 })
 export class InputComponent {
-  control = input.required<FormControl<string | null>>();
+  control = input<FormControl<string | null>>(new FormControl(''));
   label = input<string>('');
   type = input<Type>('text');
   placeholder = input<string>('');
