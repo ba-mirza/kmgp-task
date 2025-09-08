@@ -17,7 +17,6 @@ import {Router} from '@angular/router';
   ],
   providers: [ToastService],
   templateUrl: './login.html',
-  styleUrl: './login.scss'
 })
 export class Login {
   protected authService = inject(AuthService);
