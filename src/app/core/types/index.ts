@@ -19,7 +19,6 @@ export interface Order {
   customerName: string;
   status: OrderStatus;
   items: OrderItem[];
-  total: number;
   createdAt: string;
 }
 

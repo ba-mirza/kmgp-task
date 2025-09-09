@@ -1,79 +1,90 @@
-import {Component, computed, inject, OnInit, signal} from '@angular/core';
-import {OrdersApiService} from '../../core/api/orders-api.service';
+import {Component, inject, OnInit, signal, DestroyRef, ChangeDetectorRef} from '@angular/core';
 import { TagModule } from 'primeng/tag';
-import {TableModule} from 'primeng/table';
-import {Order, OrderStatus} from '../../core/types';
-import {debounceTime, distinctUntilChanged, map, Observable, of, shareReplay, startWith, switchMap, tap} from 'rxjs';
-import {AsyncPipe} from '@angular/common';
+import {TableLazyLoadEvent, TableModule} from 'primeng/table';
+import {OrderStatus} from '../../core/types';
 import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {InputComponent} from '../../components/ui/input.component';
 import { ListboxModule } from 'primeng/listbox';
+import {debounceTime, distinctUntilChanged} from 'rxjs';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {OrdersStateService} from './service/order.state-service';
+import { AutoCompleteModule } from 'primeng/autocomplete';
 
 @Component({
   selector: 'app-orders',
   imports: [
     TagModule,
     TableModule,
-    AsyncPipe,
     InputComponent,
     ReactiveFormsModule,
     ListboxModule,
     FormsModule,
+    AutoCompleteModule
+  ],
+  providers: [
+    OrdersStateService
   ],
   templateUrl: './orders.html',
 })
 export class Orders implements OnInit {
-  protected orderService = inject(OrdersApiService);
+  protected ordersState = inject(OrdersStateService);
+  protected destroyRef = inject(DestroyRef);
+  protected cdr = inject(ChangeDetectorRef);
 
-  protected orderList = signal<Observable<Order[]>>(of([]));
-  protected show = signal<boolean>(false);
-  protected statuses = signal<{status: OrderStatus}[]>([]);
-  protected selectedStatus: OrderStatus = 'new';
+  protected statusSuggestions = signal<{label: string, value: string}[]>([]);
+
+  protected allStatuses = [
+    {label: 'Все статусы', value: ''},
+    {label: 'Новый', value: 'new'},
+    {label: 'В обработке', value: 'processing'},
+    {label: 'Завершен', value: 'completed'},
+    {label: 'Отменен', value: 'cancelled'}
+  ];
+
+  protected statusControl = new FormControl<OrderStatus | ''>('');
+  protected customerName = new FormControl('');
+
+  protected orders = this.ordersState.orders;
+  protected totalRecords = this.ordersState.totalRecords;
 
   protected formattedDate = (date: string) => new Date(date).toDateString();
 
-  protected customerName = new FormControl('')
-
-  protected paginatorState = computed(() => (this.filteredOrders.length > 10));
-  protected scrollableState = computed(() => (this.filteredOrders.length > 20))
-
-  protected filteredOrders = computed((): Observable<Order[]> => {
-    const control = this.customerName as FormControl;
-
-    const nameChanges$ = control.valueChanges
-      ? (control.valueChanges as Observable<string>).pipe(
-        startWith(control.value ?? ''),
-        debounceTime(200),
-        distinctUntilChanged()
-      )
-      : of(control.value ?? '');
-
-    return nameChanges$.pipe(
-      switchMap((search) =>
-        this.orderList().pipe(
-          map(orders => {
-            const q = (search ?? '').toString().toLowerCase().trim();
-            if (!q) return orders;
-            return orders.filter(o => (o.customerName ?? '').toLowerCase().includes(q));
-          }),
-          shareReplay(1),
-        )
-      )
+  search(event: any) {
+    const query = event.query.toLowerCase();
+    const filtered = this.allStatuses.filter(status =>
+      status.label.toLowerCase().includes(query)
     );
-  });
+    this.statusSuggestions.set(filtered);
+  }
 
-  protected autoComplete(flag: boolean) {
-    this.show.set(flag);
+  onSort(event: {field: string, order: number}) {
+    const field = event.field as 'createdAt' | 'total';
+    const order = event.order === 1 ? 'asc' : 'desc';
+    this.ordersState.updateSort(field, order);
+    this.cdr.detectChanges();
+  }
+
+  onPageChange(event: TableLazyLoadEvent) {
+    const page = (event.first || 0) + 1;
+    const limit = event.rows;
+    this.ordersState.updatePagination(page, limit || 10);
   }
 
   ngOnInit(): void {
-    const orders = this.orderService.getOrders();
-    this.statuses.set([
-      {status: 'new'},
-      {status: 'cancelled'},
-      {status: 'completed'},
-      {status: 'processing'},
-    ]);
-    this.orderList.set(orders);
+    this.customerName.valueChanges.pipe(
+      debounceTime(500),
+      distinctUntilChanged(),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(customerName => {
+      this.ordersState.updateCustomerName(customerName || '')
+    });
+
+    this.statusControl.valueChanges.pipe(
+      debounceTime(500),
+      distinctUntilChanged(),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(status => {
+      this.ordersState.updateStatus((status as OrderStatus) || '');
+    })
   }
 }

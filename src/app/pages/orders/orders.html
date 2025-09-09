@@ -2,25 +2,28 @@
   <h1 class="mt-6 text-2xl font-medium mb-6">Список заказов</h1>
 
   <div class="w-full max-w-6xl">
+    <label for="customerName">Поиск по клиенту</label>
     <div class="flex items-center gap-4 mb-2">
-      <ui-input label="Поиск по клиенту" [control]="customerName" />
-      <div class="flex flex-col gap-3 relative">
-        <ui-input (focusin)="autoComplete(true)" (focusout)="autoComplete(false)" label="Фильтр по статусу" />
-        @if (show()) {
-          <div class="absolute top-18 left-0 z-50">
-            <p-listbox [(ngModel)]="selectedStatus" [options]="statuses()" optionLabel="status" class="w-full md:w-56" />
-          </div>
-        }
-      </div>
+      <ui-input id="customerName" [control]="customerName" />
+      <p-autocomplete
+        [formControl]="statusControl"
+        [dropdown]="true"
+        [suggestions]="statusSuggestions()"
+        (completeMethod)="search($event)"
+        placeholder="Выберите статус"></p-autocomplete>
     </div>
     <p-table
-      [value]="(filteredOrders() | async)!"
-      [rows]="10"
+      [value]="orders()"
+      [rows]="ordersState.limit()"
       [rowsPerPageOptions]="[10, 25, 50]"
-      [paginator]="paginatorState()"
-      [scrollable]="scrollableState()"
+      [paginator]="true"
+      [totalRecords]="totalRecords()"
+      [lazy]="true"
+      [scrollable]="totalRecords() > 20"
       [tableStyle]="{ 'min-width': '50rem' }"
-             class="p-datatable-striped p-datatable-gridlines">
+      (onLazyLoad)="onPageChange($event)"
+      (onSort)="onSort($event)"
+      class="p-datatable-striped p-datatable-gridlines">
       <ng-template pTemplate="header">
         <tr>
           <th>Номер заказа</th>
@@ -30,9 +33,9 @@
             Сумма
             <p-sortIcon field="total" />
           </th>
-          <th pSortableColumn="date">
+          <th pSortableColumn="createdAt">
             Дата создания
-            <p-sortIcon field="date" />
+            <p-sortIcon field="createdAt" />
           </th>
         </tr>
       </ng-template>
