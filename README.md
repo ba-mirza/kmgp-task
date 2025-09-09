@@ -4,56 +4,28 @@ This project was generated using [Angular CLI](https://github.com/angular/angula
 
 ## Development server
 
-To start a local development server, run:
-
+Чтобы запустить проект
 ```bash
-ng serve
+npm run start
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
+Запустить JSON server
 ```bash
-ng generate component component-name
+npx json-server src/assets/mock/db.json --port 3001
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+### Коротко мысли:
+Последний раз я писал на Angular 14 версии(или 15). Тогда еще не было standalone,
+и на проектах было по модули. Это первый раз когда пишу на 20+ и использую новые фичи Angular.
 
-```bash
-ng generate --help
-```
+Заодно поэкспериментировал возможности, signals понравились. Однако, в некоторых местах
+я бы переписал код. Особенно сервис OrdersState.
 
-## Building
+Я не успел полностью доделать, времени не хватило. Поскольку делал паузами.
+Но подобное я уже делал на реальных проектах.
 
-To build the project run:
+Забыл добавить spinner(или не успел). И другие утилиты моменты. Бонусы я решил пропустить. Тесты не писал
 
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+### Структура
+Был вариант FSD но не особо зашел. Кое-где в репозитории подсмотрел и выбрал
+более менее простой вариант разбить на core, pages, components и т.д.
