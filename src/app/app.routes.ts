@@ -13,6 +13,11 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/orders/orders').then(m => m.Orders),
   },
   {
+    path: 'orders/:id',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/order-edit/order-edit').then(m => m.OrderEdit)
+  },
+  {
     path: '**',
     redirectTo: '/orders',
   }

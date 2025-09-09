@@ -11,8 +11,9 @@ export class ProductsApiService extends BaseApiService {
     return this.get<Product[]>('/api/products', params);
   }
 
-  getProduct(id: number): Observable<Product> {
-    return this.get<Product>(`/api/products/${id}`);
+  getProductsByIds(ids: number[]): Observable<Product[]> {
+    const idsString = ids.join(',');
+    return this.http.get<Product[]>(`/api/products?id=${idsString}`);
   }
 
   searchProducts(query: string): Observable<Product[]> {

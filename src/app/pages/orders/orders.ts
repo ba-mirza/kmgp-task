@@ -1,14 +1,15 @@
-import {Component, inject, OnInit, signal, DestroyRef, ChangeDetectorRef} from '@angular/core';
+import {Component, inject, OnInit, signal, DestroyRef} from '@angular/core';
 import { TagModule } from 'primeng/tag';
 import {TableLazyLoadEvent, TableModule} from 'primeng/table';
-import {OrderStatus} from '../../core/types';
+import {Order, OrderStatus} from '../../core/types';
 import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {InputComponent} from '../../components/ui/input.component';
 import { ListboxModule } from 'primeng/listbox';
 import {debounceTime, distinctUntilChanged} from 'rxjs';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {OrdersStateService} from './service/order.state-service';
-import { AutoCompleteModule } from 'primeng/autocomplete';
+import {AutoCompleteCompleteEvent, AutoCompleteModule} from 'primeng/autocomplete';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-orders',
@@ -22,14 +23,14 @@ import { AutoCompleteModule } from 'primeng/autocomplete';
     AutoCompleteModule
   ],
   providers: [
-    OrdersStateService
+    OrdersStateService,
   ],
   templateUrl: './orders.html',
 })
 export class Orders implements OnInit {
   protected ordersState = inject(OrdersStateService);
   protected destroyRef = inject(DestroyRef);
-  protected cdr = inject(ChangeDetectorRef);
+  protected router = inject(Router);
 
   protected statusSuggestions = signal<{label: string, value: string}[]>([]);
 
@@ -49,7 +50,7 @@ export class Orders implements OnInit {
 
   protected formattedDate = (date: string) => new Date(date).toDateString();
 
-  search(event: any) {
+  search(event: AutoCompleteCompleteEvent) {
     const query = event.query.toLowerCase();
     const filtered = this.allStatuses.filter(status =>
       status.label.toLowerCase().includes(query)
@@ -61,13 +62,19 @@ export class Orders implements OnInit {
     const field = event.field as 'createdAt' | 'total';
     const order = event.order === 1 ? 'asc' : 'desc';
     this.ordersState.updateSort(field, order);
-    this.cdr.detectChanges();
   }
 
   onPageChange(event: TableLazyLoadEvent) {
     const page = (event.first || 0) + 1;
     const limit = event.rows;
     this.ordersState.updatePagination(page, limit || 10);
+  }
+
+  openEditPage(order: Order) {
+    const productIds = order.items.map(item => item.productId).join(',');
+    this.router.navigate([`/orders/${order.id}`], {
+      queryParams: { products: productIds }
+    });
   }
 
   ngOnInit(): void {
